@@ -161,6 +161,7 @@ exports.deleteAllFiles = async (req, res) => {
       res.status(404).json({ message: 'No files found' });
     } else {
       await File.deleteMany();
+      await User.updateMany({}, { $set: { files: [] } });
       res.status(200).json({ message: 'All files deleted successfully' });
     }
   } catch (err) {

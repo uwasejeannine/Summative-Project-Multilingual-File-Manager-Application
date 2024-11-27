@@ -14,7 +14,7 @@ require("dotenv").config();
  * This URL is used to connect to the MongoDB database.
  * It is stored in an environment variable for security reasons.
  */
-const url = "mongodb+srv://mulimuoki001:15121%40Muli@cluster0.458t6.mongodb.net/filesmanager?retryWrites=true&w=majority&appName=Cluster0";
+const url = process.env.MONGODB_URL;
 
 /**
  * Database connection object.
@@ -35,7 +35,7 @@ let dbConnection;
  */
 module.exports = {
   connectToDb: (cb) => {
-    mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true, dbName: "filesmanager" })
+    mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true, dbName: "multilingualFilesManager",retryWrites: true, w: "majority" })
       .then(() => {
         dbConnection = mongoose.connection;
         console.log("Successfully connected to MongoDB.");

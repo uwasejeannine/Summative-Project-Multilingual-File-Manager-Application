@@ -23,24 +23,6 @@ const sessionController = require('../controllers/sessionController');
  */
 
 /**
- * Root route.
- * 
- * This route logs information about the current session and user.
- * 
- * @route GET /
- */
-router.get('/', (req, res) => {
-  console.log('Session:', req.session);
-  console.log('User:', req.user);
-  if (req.isAuthenticated()) {
-    console.log('User is authenticated');
-  } else {
-    console.log('User is not authenticated');
-  }
-  res.send('Hello World!');
-});
-
-/**
  * Get session route.
  * 
  * This route retrieves the current session.
