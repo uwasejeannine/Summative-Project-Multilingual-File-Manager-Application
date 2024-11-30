@@ -15,6 +15,8 @@ const router = express.Router();
 const filesController = require('../controllers/filescontroller');
 const usersController = require('../controllers/userscontroller');
 const sessionController = require('../controllers/sessionController');
+const languageController = require('../controllers/languageController');
+
 
 /**
  * User routes.
@@ -183,4 +185,20 @@ router.get('/getSessionByUserId/:id', sessionController.getSessionByUserId);
  * 
  * This allows other parts of the application to use the router.
  */
+
+// Route to create a new language
+router.post('/languages', languageController.createLanguage);
+
+// Route to update an existing language
+router.put('/languages/:id', languageController.updateLanguage);
+
+
+// Route to delete a language
+router.delete('/languages/:id', languageController.deleteLanguage);
+
+// Route to get all languages
+router.get('/languages', languageController.getAllLanguages);
+
+// Route to get a specific language by ID
+router.get('/languages/:id', languageController.getLanguage);
 module.exports = router;
