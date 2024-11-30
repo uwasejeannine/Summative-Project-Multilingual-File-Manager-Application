@@ -32,10 +32,10 @@ exports.uploadFile = async (req, res) => {
     upload.any()(req, res, async (err) => {
       if (err) {
         console.error(err);
-        res.status(500).json({ message: 'Error uploading file' });
+        res.status(500).json({ message: req.t('errorUploadingFile') });
       } else {
         if (!req.session.passport) {
-          res.status(401).json({ message: 'You must be logged in to upload files' });
+          res.status(401).json({ message: req.t('mustBeLoggedInToUploadFiles') });
           return;
         }
         const userId = req.session.passport.user;
@@ -54,19 +54,19 @@ exports.uploadFile = async (req, res) => {
           try {
             await fileDoc.save();
             await User.findByIdAndUpdate(userId, { $push: { files: fileDoc._id } });
-            res.json({ message: 'File uploaded successfully' });
+            res.json({ message: req.t('fileUploadedSuccessfully') });
           } catch (err) {
             console.error(err);
-            res.status(500).json({ message: 'Error saving file to database' });
+            res.status(500).json({ message: req.t('errorSavingFileToDatabase') });
           }
         } else {
-          res.status(400).json({ message: 'No file uploaded' });
+          res.status(400).json({ message: req.t('noFileUploaded') });
         }
       }
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Error uploading file' });
+    res.status(500).json({ message: req.t('errorUploadingFile') });
   }
 }
 
@@ -85,7 +85,7 @@ exports.allFiles = async (req, res) => {
     res.json(files);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Error getting files' });
+    res.status(500).json({ message: req.t('errorGettingFiles') });
   }
 }
 
@@ -101,7 +101,7 @@ exports.allFiles = async (req, res) => {
 exports.userFiles = async (req, res) => {
   try {
     if (!req.session.passport) {
-      res.status(401).json({ message: 'You must be logged in to view your files' });
+      res.status(401).json({ message: req.t('mustBeLoggedInToViewFiles') });
       return;
     } else {
       const userId = req.session.passport.user;
@@ -110,7 +110,7 @@ exports.userFiles = async (req, res) => {
     }
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Error getting user files' });
+    res.status(500).json({ message: req.t('errorGettingUserFiles') });
   }
 }
 
@@ -126,22 +126,22 @@ exports.userFiles = async (req, res) => {
 exports.deleteFile = async (req, res) => {
   try {
     if (!req.session.passport) {
-      res.status(401).json({ message: 'You must be logged in to delete files' });
+      res.status(401).json({ message: req.t('mustBeLoggedInToDeleteFiles') });
       return;
     }
     const userId = req.session.passport.user;
     const fileId = req.params.id;
     const result = await File.deleteOne({ _id: fileId });
     if (result.deletedCount === 0) {
-      res.status(404).json({ message: 'File not found' });
+      res.status(404).json({ message: req.t('fileNotFound') });
       return;
     } else if (result.deletedCount === 1) {
       await User.findByIdAndUpdate(userId, { $pull: { files: fileId } });
-      res.status(200).json({ message: 'File deleted successfully' });
+      res.status(200).json({ message: req.t('fileDeletedSuccessfully') });
     }
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Error deleting file' });
+    res.status(500).json({ message: req.t('errorDeletingFile') });
   }
 }
 
@@ -158,14 +158,14 @@ exports.deleteAllFiles = async (req, res) => {
   try {
     const count = await File.countDocuments();
     if (count === 0) {
-      res.status(404).json({ message: 'No files found' });
+      res.status(404).json({ message: req.t('noFilesFound') });
     } else {
       await File.deleteMany();
       await User.updateMany({}, { $set: { files: [] } });
-      res.status(200).json({ message: 'All files deleted successfully' });
+      res.status(200).json({ message: req.t('allFilesDeletedSuccessfully') });
     }
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Error deleting all files' });
+    res.status(500).json({ message: req.t('errorDeletingAllFiles') });
   }
 }

@@ -10,6 +10,33 @@ const app = express();
 const db = require('./database/db');
 const routes = require('./routers/allrouters');
 const crypto = require('crypto');
+const i18next = require('i18next');
+const middleware = require('i18next-http-middleware');
+const Backend = require('i18next-fs-backend');
+const path = require('path');
+
+
+
+// Fix i18next configuration
+i18next
+  .use(Backend)
+  .use(middleware.LanguageDetector)
+  .init({
+    fallbackLng: 'en',
+    supportedLngs: ['en', 'fr', 'sw', 'rw'],
+    backend: {
+      loadPath: path.join(__dirname, './locales/{{lng}}/translation.json')
+    },
+    detection: {
+      order: ['querystring', 'cookie', 'header'],
+      lookupQuerystring: 'lng',
+      lookupCookie: 'i18next',
+      caches: ['cookie']
+    }
+  });
+
+app.use(middleware.handle(i18next));
+app.use(express.json());
 
 /**
  * Generate a secret key for session encryption.
@@ -23,7 +50,6 @@ const secretKey = crypto.randomBytes(32).toString('base64');
 /**
  * Enable JSON parsing for incoming requests.
  */
-app.use(express.json());
 
 /**
  * Set up session management.
