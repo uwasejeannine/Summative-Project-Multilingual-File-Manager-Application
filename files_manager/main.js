@@ -160,3 +160,8 @@ db.connectToDb((err) => {
     });
   }
 });
+
+
+//redis-cli ping
+//redis-cli
+//KEYS *

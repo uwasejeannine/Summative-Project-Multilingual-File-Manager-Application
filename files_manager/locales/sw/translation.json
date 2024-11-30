@@ -20,7 +20,7 @@
   "errorDeletingAllUsers": "Kulikuwa na tatizo wakati wa kuondoa watumiaji wote",
   "errorGettingSession": "Kulikuwa na tatizo wakati wa kupata kikao",
 
-   "errorUploadingFile": "Kulikuwa na tatizo wakati wa kupakia faili",
+  "errorUploadingFile": "Kulikuwa na tatizo wakati wa kupakia faili",
   "mustBeLoggedInToUploadFiles": "Unapaswa kuingia ili kupakia faili",
   "fileUploadedSuccessfully": "Faili imepakuliwa kwa mafanikio",
   "errorSavingFileToDatabase": "Kulikuwa na tatizo wakati wa kuhifadhi faili kwenye database",

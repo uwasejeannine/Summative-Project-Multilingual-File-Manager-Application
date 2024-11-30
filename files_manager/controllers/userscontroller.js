@@ -245,7 +245,7 @@ exports.getSession = async (req, res) => {
 }
 
 /**
- * Get all users.
+ * Get all users.t
  * 
  * This function retrieves all users.
  * 

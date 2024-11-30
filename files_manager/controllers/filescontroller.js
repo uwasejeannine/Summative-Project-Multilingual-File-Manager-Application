@@ -7,6 +7,8 @@
 const multer = require('multer');
 const mongoose = require('mongoose');
 const User = require('../models/user');
+const fileQueue = require('../queue/fileQueue');
+
 
 /**
  * Multer configuration.
@@ -169,3 +171,14 @@ exports.deleteAllFiles = async (req, res) => {
     res.status(500).json({ message: req.t('errorDeletingAllFiles') });
   }
 }
+exports.uploadFile = async (req, res) => {
+  const { filename } = req.body;
+
+  try {
+    const job = await fileQueue.add({ filename }); // Add task to queue
+    res.status(201).json({ message: 'File upload queued', jobId: job.id });
+  } catch (err) {
+    console.error('Error queuing file upload:', err);
+    res.status(500).json({ message: 'Error queuing file upload' });
+  }
+};
