@@ -20,11 +20,11 @@ To get started with the app, follow these steps:
 4. Configure environment variables: `cp .env.example .env`
 5. Start the app: `npm run start`
 
-## Routes
+# Routes
 
 The app has the following routes:
 
-# User Routes
+## User Routes
 
 These routes handle user-related operations.
 
@@ -80,7 +80,7 @@ These routes handle user-related operations.
 * Handler: `usersController.updatePassword`
 
 
-# File Routes
+## File Routes
 
 These routes handle file-related operations.
 
@@ -141,7 +141,7 @@ These routes handle file-related operations.
 * Handler: `filesController.downloadFile`
 
 
-# Session Routes
+## Session Routes
 
 These routes handle session-related operations.
 
@@ -167,7 +167,7 @@ These routes handle session-related operations.
 
 
 
-# Language Routes
+## Language Routes
 
 These routes handle language-related operations.
 
@@ -196,13 +196,12 @@ These routes handle language-related operations.
 
 * **GET** `/languages/:id`
 * Handler: `languageController.getLanguage`
-## API Documentation
 
-T
+
 ## Contributing
 
 Contributions are welcome! If you'd like to contribute to the app, please fork the repository and submit a pull request.
 
 ## License
 
-The app is licensed under the MIT License.
+The app is licensed under the ALU License.
