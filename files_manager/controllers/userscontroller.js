@@ -23,7 +23,6 @@ exports.createUser = async (req, res) => {
   try {
     const { username, email } = req.body;
     const existingUser = await User.findOne({ $or: [{ username }, { email }] });
-    
     if (existingUser) {
       const errors = {};
       if (existingUser.username === username) {
@@ -32,26 +31,29 @@ exports.createUser = async (req, res) => {
       if (existingUser.email === email) {
         errors[email] = req.t('emailExists');
       }
+      if (existingUser.username === username && existingUser.email === email) {
+        errors[username] = req.t('usernameExists1');
+        errors[email] = req.t('emailExists1');
+      }
       return res.status(400).json({ errors });
+    } else {
+      const user = new User({
+        username,
+        email,
+        role: req.body.role,
+        password: req.body.password
+      });
+      await user.save();
+      const { username: createdUsername, email: createdEmail } = user;
+      res.status(201).json({
+        message: req.t('user_creat_success', { username: createdUsername, email: createdEmail })
+      })
     }
-    
-    const user = new User({
-      username: req.body.username,
-      email: req.body.email,
-      password: req.body.password,
-    });
-    
-    await user.save();
-    res.status(201).json({
-      message: req.t('user_creat_success', { username, email })
-    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: req.t('errorCreatingUser') });
   }
-};
-
-
+}
 /**
  * Log in a user.
  * 
@@ -92,7 +94,7 @@ exports.loginUser = async (req, res, next) => {
       });
       await session.save();
 
-      res.redirect('/getsession');
+      return res.status(200).json({ message: req.t('loginSuccess', { username }) });
     });
   })(req, res, next);
 }
@@ -126,6 +128,7 @@ exports.logoutUser = async (req, res) => {
   }
 }
 
+
 /**
  * Get a user by ID.
  * 
@@ -137,12 +140,24 @@ exports.logoutUser = async (req, res) => {
  */
 exports.getUser = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
-    if (!user) {
-      res.status(404).json({ message: req.t('userNotFound') });
+    if (!req.session.passport) {
+      res.status(401).json({ message: req.t('mustBeLoggedInToGetUser') });
+      return;
     } else {
-      res.json(user);
-    }
+      const user = await User.findById(req.params.id);
+
+      if (!user) {
+        res.status(404).json({ message: req.t('userNotFound') });
+      } else {
+        if (req.user.role === 'admin') {
+          res.json(user);
+          res.status(200).json({ message: req.t('userFound') });
+        }else{
+          res.status(401).json({ message: req.t('notAuthorized') });
+        }
+      }
+      }
+    
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: req.t('errorGettingUser') });
@@ -160,17 +175,63 @@ exports.getUser = async (req, res) => {
  */
 exports.updateUser = async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!req.session.passport) {
+      res.status(401).json({ message: req.t('loginRequired1') });
+      return;
+    }
+    const userId = req.session.passport.user;
+    const user = await User.findById(userId);
     if (!user) {
       res.status(404).json({ message: req.t('userNotFound') });
     } else {
-      res.json(user);
+      const { email } = req.body;
+
+      user.email = email;
+
+      const existingUser = await User.findOne({ email: user.email });
+      if (existingUser && existingUser._id.toString() !== user._id.toString()) {
+        return res.status(400).json({ errors: { email: req.t('emailExists') } });
+      }
+
+      await user.save();
+      req.session.passport.user.email = user.email;
+      res.redirect('/logout');
     }
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: req.t('errorUpdatingUser') });
   }
 }
+/**
+ * Delete a user.
+ * 
+ * This function allows users to delete their own account.
+ * 
+ * @param {object} req - The request object.
+ * @param {object} res - The response object.
+ * @returns {void}
+ */
+exports.deleteUserAccount = async (req, res) => {
+  try {
+    if (!req.session.passport) {
+      res.status(401).json({ message: req.t('loginRequired2') });
+      return;
+    }
+    const userId = req.session.passport.user;
+    await File.deleteMany({ owner: userId });
+    const result = await User.deleteOne({ _id: userId });
+    if (result.deletedCount === 0) {
+      res.status(404).json({ message: req.t('userNotFound') });
+    } else {
+      req.session.destroy();
+      res.status(200).json({ message: req.t('userDeleted1') });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: req.t('errorDeletingUser') });
+  }
+}
+
 
 /**
  * Delete a user.
@@ -184,22 +245,39 @@ exports.updateUser = async (req, res) => {
 exports.deleteUser = async (req, res) => {
   try {
     if (!req.session.passport) {
-      res.status(401).json({ message: req.t('loginRequired') });
+      res.status(401).json({ message: req.t('loginRequired3') });
       return;
     }
-    const userId = req.session.passport.user;
-    await File.deleteMany({ owner: userId });
-    const result = await User.deleteOne({ _id: userId });
-    if (result.deletedCount === 0) {
-      res.status(404).json({ message: req.t('userNotFound') });
-    } else {
-      res.status(200).json({ message: req.t('userDeleted') });
+    const userId = req.params.id;
+    const currentUserId = req.session.passport.user;
+    const currentUser = await User.findById(currentUserId);
+    if (currentUser.role === 'admin') {
+      await File.deleteMany({ owner: userId });
+      const result = await User.deleteOne({ _id: userId });
+      if (result.deletedCount === 0) {
+        res.status(404).json({ message: req.t('userNotFound') });
+      } else {
+        // Invalidate the user's session
+        const sessions = await Session.find({ userId });
+        sessions.forEach((session) => {
+          session.destroy((err) => {
+            if (err) {
+              console.error(err);
+            }
+          });
+        });
+        res.status(200).json({ message: req.t('userDeleted') });
+      }
+    }else{
+      res.status(401).json({ message: req.t('notAuthorized') });
     }
+    
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: req.t('errorDeletingUser') });
   }
 }
+
 
 /**
  * Delete all users.
@@ -212,37 +290,33 @@ exports.deleteUser = async (req, res) => {
  */
 exports.deleteAllUsers = async (req, res) => {
   try {
-    const count = await User.countDocuments();
-    if (count === 0) {
-      res.status(404).json({ message: req.t('noUsersFound') });
-    } else {
-      await User.deleteMany();
-      await File.deleteMany();
-      res.status(200).json({ message: req.t('allUsersDeleted') });
+    if (!req.session.passport) {
+      res.status(401).json({ message: req.t('loginRequired4') });
+      return;
+    }else{
+      const currentAdminId = req.session.passport.user;
+      const currentUser = await User.findById(currentAdminId);
+      if (currentUser.role === 'admin') {
+        await File.deleteMany();
+        const result = await User.deleteMany();
+        if (result.deletedCount === 0) {
+          res.status(404).json({ message: req.t('noUsersFound') });
+        } else {
+          req.session.destroy();
+          res.status(200).json({ message: req.t('allUsersDeleted') });
+        }
+      }else{
+        res.status(401).json({ message: req.t('notAuthorized') });
+      }
     }
+    
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: req.t('errorDeletingAllUsers') });
   }
+    
 }
 
-/**
- * Get the current session.
- * 
- * This function retrieves the current session.
- * 
- * @param {object} req - The request object.
- * @param {object} res - The response object.
- * @returns {void}
- */
-exports.getSession = async (req, res) => {
-  try {
-    res.json(req.session);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: req.t('errorGettingSession') });
-  }
-}
 
 /**
  * Get all users.t
@@ -253,12 +327,69 @@ exports.getSession = async (req, res) => {
  * @param {object} res - The response object.
  * @returns {void}
  */
+/**
+ * Get all users.
+ * 
+ * This function retrieves all users.
+ * 
+ * @param {object} req - The request object.
+ * @param {object} res - The response object.
+ * @returns {void}
+ */
 exports.getAllUsers = async (req, res) => {
   try {
-    const users = await User.find();
-    res.json(users);
+    if (!req.session.passport) {
+      res.status(401).json({ message: req.t('loginRequired5') });
+      return;
+    }
+    const currentUserId = req.session.passport.user;
+    const currentUser = await User.findById(currentUserId);
+    if (currentUser.role === 'admin') {
+      const users = await User.find();
+      res.json(users);
+    } else {
+      res.status(401).json({ message: req.t('notAuthorized') });
+    }
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: req.t('errorGettingUsers') });
+    res.status(500).json({ message: req.t("errorGettingAllUsers") });
+  }
+}
+
+
+
+/**
+ * Updateb user password.
+ * 
+ * This function updates the password of a user.
+ * 
+ * @param {object} req - The request object.
+ * @param {object} res - The response object.
+ * @returns {void}
+ */
+
+exports.updatePassword = async (req, res) => {
+  try {
+    if (!req.session.passport) {
+      res.status(401).json({ message: req.t('loginRequired6') });
+      return;
+    }
+    const userId = req.session.passport.user;
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({ message: req.t('userNotFound') });
+    } else {
+      const isValidPassword = await user.comparePassword(req.body.currentPassword);
+      if (!isValidPassword) {
+        res.status(400).json({ message: req.t('invalidCurrentPassword') });
+      } else {
+        user.password = req.body.newPassword;
+        await user.save();
+        res.status(200).json({ message: req.t('passwordUpdated') });
+      }
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: req.t('errorUpdatingPassword') });
   }
 }

@@ -5,6 +5,7 @@
  */
 
 const Session = require('../models/session');
+const User = require('../models/user');
 
 /**
  * Get all sessions.
@@ -17,18 +18,23 @@ const Session = require('../models/session');
  */
 exports.getAllSessions = async (req, res) => {
   try {
-    const sessions = await Session.find();
-    const count = await Session.countDocuments();
+    if (!req.session.passport) {
+      res.status(401).json({ message: req.t('mustBeLoggedInToViewSessions') });
+      return;
+    }
+    const currentUserId = req.session.passport.user;
+    const currentUser = await User.findById(currentUserId);
+    if (currentUser.role === 'admin') {
+      const sessions = await Session.find();
 
-    if (count === 0) {
-      res.status(404).json({ message: 'No sessions found for this user. No user has logged into this application yet' });
-    } else {
-      res.setHeader('X-Total-Count', count);
+      res.setHeader('X-Total-Count', sessions.length);
       res.json(sessions);
+    } else {
+      res.status(401).json({ message: req.t('notAuthorizedToViewSessions') });
     }
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Error getting sessions' });
+    res.status(500).json({ message: req.t('errorGettingSessions') });
   }
 };
 
@@ -43,18 +49,87 @@ exports.getAllSessions = async (req, res) => {
  */
 exports.getSessionByUserId = async (req, res) => {
   try {
+    if (!req.session.passport) {
+      res.status(401).json({ message: req.t('mustBeLoggedInToViewThisUsersSessions') });
+      return;
+    }
+    const currentUserId = req.session.passport.user;
+    const currentUser = await User.findById(currentUserId);
     const userId = req.params.id;
-    const session = await Session.find({ userId: userId });
-    const count = await Session.countDocuments({ userId: userId });
-
-    if (!session) {
-      res.status(404).json({ message: 'Session not found' });
+    const user = await User.findById(userId);
+    if (currentUser.role === 'admin') {
+      
+      
+      if (!user) {
+        res.status(404).json({ message:req.t('userNotFound') });
+      }else{
+        const sessions = await Session.find({ user: userId });
+        if (sessions.length === 0) {
+          res.status(404).json({ message: req.t('noSessionsFoundForThisUser') });
+        } else {
+          res.setHeader('X-Total-Count', sessions.length);
+          res.json(sessions);
+        }
+      }
     } else {
-      res.setHeader('X-Total-Count', count);
-      res.json(session);
+      res.status(401).json({ message: req.t('notAuthorizedToViewThisUsersSessions') });
     }
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Error getting session' });
+    res.status(500).json({ message: req.t('errorGettingThisUsersSessions') });
   }
 };
+
+exports.deleteAllSessionsForAnyUser = async (req, res) => {
+  try {
+    if (!req.session.passport) {
+      res.status(401).json({ message: req.t('mustBeLoggedInToDeleteAllOtherUsersSessions') });
+      return;
+    }
+    const userId = req.params.id;
+    const currentUserId = req.session.passport.user;
+    const currentUser = await User.findById(currentUserId);
+    if (currentUser.role === 'admin') {
+      const result = await Session.deleteMany({ userId: userId });
+      if (result.deletedCount === 0) {
+        res.status(404).json({ message: req.t('noSessionsFoundForThisUser') });
+      } else {
+        res.status(200).json({ message: req.t('allOtherUsersSessionsDeletedSuccessfully') });
+      }
+      
+    } else {
+      res.status(401).json({ message: req.t('notAuthorizedToDeleteAllOtherUsersSessions') });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: req.t('errorDeletingAllThisUsersSessions') });
+  }
+}
+/**
+ * Delete all sessions.
+ * 
+ * This function deletes all sessions from the database. You must be logged in as an admin to delete all sessions.
+ *
+ */
+exports.deleteAllSessions = async (req, res) => {
+  try {
+    if (!req.session.passport) {
+      res.status(401).json({ message: req.t('mustBeLoggedInToDeleteAllSessions') });
+      return;
+    }
+    const currentUserId = req.session.passport.user;
+    const currentUser = await User.findById(currentUserId);
+    if (currentUser.role === 'admin') {
+      await Session.deleteMany();
+      req.session.destroy();
+
+      res.status(200).json({ message: req.t('allSessionsDeletedSuccessfully') });
+    } else {
+      res.status(401).json({ message: req.t('notAuthorizedToDeleteAllSessions') });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: req.t('errorDeletingAllSessions') });
+  }
+};
+

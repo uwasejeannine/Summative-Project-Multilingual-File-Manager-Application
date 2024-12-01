@@ -1,8 +1,8 @@
 /**
  * User model module.
  * 
- * This module defines the User model using Mongoose.
- * It exports the User model.
+ * Defines the User model using Mongoose.
+ * Exports the User model.
  */
 
 const mongoose = require('mongoose');
@@ -11,47 +11,20 @@ const bcrypt = require('bcrypt');
 /**
  * User schema definition.
  * 
- * This schema defines the structure of the User document in the database.
- * It includes fields for username, email, password, and a reference to files.
+ * Defines the structure of the User document in the database.
  */
 const userSchema = new mongoose.Schema({
-  /**
-   * Username.
-   * 
-   * The username chosen by the user.
-   */
   username: String,
-
-  /**
-   * Email.
-   * 
-   * The email address of the user.
-   */
   email: String,
-
-  /**
-   * Password.
-   * 
-   * The password of the user, hashed for security.
-   */
   password: String,
-
-  /**
-   * Files.
-   * 
-   * An array of references to files owned by the user.
-   */
-  files: [{ type: mongoose.Schema.Types.ObjectId, ref: 'File' }]
+  role: { type: String, enum: ['admin', 'user'], default: 'user' },
+  files: [{ type: String, ref: 'File' }]
 });
 
 /**
  * Pre-save hook: hash password.
  * 
- * This function is called before the user document is saved to the database.
- * It hashes the password using bcrypt.
- * 
- * @param {function} next - Callback function to be invoked after hashing is complete.
- * @returns {void}
+ * Hashes the password using bcrypt before saving the user document.
  */
 userSchema.pre('save', async function(next) {
   try {
@@ -68,7 +41,7 @@ userSchema.pre('save', async function(next) {
 /**
  * Compare password method.
  * 
- * This method compares a given password with the hashed password stored in the database.
+ * Compares a given password with the hashed password stored in the database.
  * 
  * @param {string} password - The password to compare.
  * @returns {boolean} True if the password matches, false otherwise.
@@ -85,11 +58,8 @@ userSchema.methods.comparePassword = async function(password) {
 /**
  * User model.
  * 
- * This is the Mongoose model for the User document.
+ * Mongoose model for the User document.
  */
 const User = mongoose.model('User', userSchema);
 
-/**
- * Export the User model.
- */
 module.exports = User;
