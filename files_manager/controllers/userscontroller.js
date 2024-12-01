@@ -195,7 +195,7 @@ exports.updateUser = async (req, res) => {
 
       await user.save();
       req.session.passport.user.email = user.email;
-      res.redirect('/logout');
+      res.status(200).json({ message: req.t('userUpdated') });
     }
   } catch (err) {
     console.error(err);

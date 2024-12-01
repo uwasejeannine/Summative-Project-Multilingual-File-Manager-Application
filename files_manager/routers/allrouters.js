@@ -52,7 +52,7 @@ router.post('/updateMyPassword', usersController.updatePassword);
  * These routes handle file-related operations.
  */
 // Upload a file
-router.post('/upload', filesController.uploadFile);
+router.post('/upload', filesController.uploadFiles);
 // Get all files
 router.get('/allFiles', filesController.allFiles);
 // Get user files

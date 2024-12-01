@@ -53,7 +53,6 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
-const encryptionKey = crypto.randomBytes(32).toString('base64');
 
 /**
  * Upload a file.
@@ -65,12 +64,12 @@ const encryptionKey = crypto.randomBytes(32).toString('base64');
  * @param {object} res - The response object.
  * @returns {void}
  */
-exports.uploadFile = async (req, res) => {
+exports.uploadFiles = async (req, res) => {
   try {
     const allowedFileTypes = ['image/jpeg', 'image/png', 'application/pdf'];
     const maxFileSize = 1024 * 512; // 500KB
 
-    upload.any()(req, res, async (err) => {
+    upload.array()(req, res, async (err) => {
       if (err) {
         console.error(err);
         return res.status(500).json({ message:  req.t('errorUploadingFile') });
@@ -90,7 +89,7 @@ exports.uploadFile = async (req, res) => {
       if (file.size > maxFileSize) {
         return res.status(400).json({ message: req.t('fileSizeLimitExceeded') });
       }
-
+      const fileDocs = [];
       if (req.files && req.files.length > 0) {
         const fileDoc = new File({
           filename: req.uniqueName,
@@ -104,10 +103,15 @@ exports.uploadFile = async (req, res) => {
           fileStatus: 'active'
         });
 
+        fileDocs.push(fileDoc);
+
         try {
-          await fileDoc.save();
-          await User.findByIdAndUpdate(userId, { $push: { files: fileDoc.filename} });
-          return res.json({ message: req.t('fileUploadedSuccessfully') });
+          await Promise.all(fileDocs.map(async (fileDoc) => {
+            await fileDoc.save();
+            await User.findByIdAndUpdate(userId, { $push: { files: fileDoc.filename } });
+          }));
+  
+          return res.json({ message: req.t('UploadedSuccessfully') });
         } catch (err) {
           console.error(err);
           return res.status(500).json({ message: req.t('errorSavingFileToDatabase') });

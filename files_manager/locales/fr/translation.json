@@ -76,6 +76,7 @@
   "notAuthorizedToUpdateFileName": "Vous n'êtes pas autorisé à mettre à jour le nom du fichier",
   "filenameAlreadyExists": "Un fichier avec le même nom existe déjà",
   "fileNameUpdatedSuccessfully": "Nom du fichier mis à jour avec succès",
+  "UploadedSuccessfully": "Fichier telechargeé avec sucees",
 
   "mustBeLoggedInToViewSessions": "Vous devez être connecté pour afficher toutes les sessions pour tous les utilisateurs",
   "noSessionsFound": "Aucune session trouvée",

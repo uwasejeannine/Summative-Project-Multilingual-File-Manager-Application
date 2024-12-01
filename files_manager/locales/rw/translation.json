@@ -76,6 +76,7 @@
   "notAuthorizedToUpdateFileName": "Wewe siyo uruhushwa kubahiriza izina rya ishyo",
   "filenameAlreadyExists": "Ishyo ryiza ryari ryitwa ryari ryitwa",
   "fileNameUpdatedSuccessfully": "Izina rya ishyo ryabahirizwe neza",
+  "UploadedSuccessfully": "Ishyo kiyagize neza",
 
   "mustBeLoggedInToViewSessions": "Ni hitaji kwako kwinjira ili kupita amasessi yose ya abantu bose",
   "noSessionsFound": "Amasessi nta yabonetse",
