@@ -22,7 +22,7 @@ To get started with the app, follow these steps:
 
 # Routes
 
-The app has the following routes:
+The following routes were tested  using Postman:
 
 ## User Routes
 
