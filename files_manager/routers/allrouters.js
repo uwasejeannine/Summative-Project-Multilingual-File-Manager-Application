@@ -18,187 +18,94 @@ const sessionController = require('../controllers/sessionController');
 const languageController = require('../controllers/languageController');
 
 
-/**
- * User routes.
- * 
- * These routes handle user-related functionality.
- */
 
 /**
- * Get session route.
+ * User routes
  * 
- * This route retrieves the current session.
- * 
- * @route GET /getsession
+ * These routes handle user-related operations.
  */
-router.get('/getsession', usersController.getSession);
-
-/**
- * Register user route.
- * 
- * This route creates a new user.
- * 
- * @route POST /register
- */
+// Register a new user
 router.post('/register', usersController.createUser);
-
-/**
- * Login user route.
- * 
- * This route logs in an existing user.
- * 
- * @route POST /user/login
- */
+// Login a user
 router.post('/user/login', usersController.loginUser);
-
-/**
- * Get user route.
- * 
- * This route retrieves a user by ID.
- * 
- * @route GET /users/:id
- */
+// Get user details by ID
 router.get('/users/:id', usersController.getUser);
-
-/**
- * Update user route.
- * 
- * This route updates an existing user.
- * 
- * @route PUT /users/:id
- */
-router.put('/users/:id', usersController.updateUser);
-
-/**
- * Delete user route.
- * 
- * This route deletes a user.
- * 
- * @route DELETE /deleteUser
- */
-router.delete('/deleteUser', usersController.deleteUser);
-
-/**
- * Get all users route.
- * 
- * This route retrieves all users.
- * 
- * @route GET /allusers
- */
+// Update my profile
+router.put('/myProfile', usersController.updateUser);
+// Delete a user account
+router.delete('/deleteMyAccount', usersController.deleteUserAccount);
+// Delete a user by ID
+router.delete('/deleteUser/:id', usersController.deleteUser);
+// Get all users
 router.get('/allusers', usersController.getAllUsers);
-
-/**
- * Delete all users route.
- * 
- * This route deletes all users.
- * 
- * @route DELETE /deleteAllUsers
- */
+// Delete all users
 router.delete('/deleteAllUsers', usersController.deleteAllUsers);
-
-/**
- * Logout user route.
- * 
- * This route logs out the current user.
- * 
- * @route GET /logout
- */
+// Logout a user
 router.get('/logout', usersController.logoutUser);
+// Update user password
+router.post('/updateMyPassword', usersController.updatePassword);
+
 
 /**
- * File routes.
+ * File routes
  * 
- * These routes handle file-related functionality.
+ * These routes handle file-related operations.
  */
-
-/**
- * Upload file route.
- * 
- * This route uploads a new file.
- * 
- * @route POST /upload
- */
-router.post('/upload', filesController.uploadFile);
-
-/**
- * Get all files route.
- * 
- * This route retrieves all files.
- * 
- * @route GET /allFiles
- */
+// Upload a file
+router.post('/upload', filesController.uploadFiles);
+// Get all files
 router.get('/allFiles', filesController.allFiles);
-
-/**
- * Get user files route.
- * 
- * This route retrieves files for the current user.
- * 
- * @route GET /userFiles
- */
-router.get('/userFiles', filesController.userFiles);
-
-/**
- * Delete file route.
- * 
- * This route deletes a file by ID.
- * 
- * @route DELETE /deleteFile/:id
- */
+// Get user files
+router.get('/myfiles', filesController.userFiles);
+// Get other user's files by ID
+router.get('/otherUsersFiles/:id', filesController.otherUsersFiles);
+// Update a file by ID
+router.put('/updateFile/:id', filesController.updateFileName);
+// Delete a file by ID for any user
+router.delete('/deleteOtherUsersFiles/:id', filesController.deleteFileByIdForAnyUser);
+// Delete a file by ID
 router.delete('/deleteFile/:id', filesController.deleteFile);
-
-/**
- * Delete all files route.
- * 
- * This route deletes all files.
- * 
- * @route DELETE /deleteAllFiles
- */
+// Delete all files for all users
 router.delete('/deleteAllFiles', filesController.deleteAllFiles);
+//Delete all my files
+router.delete('/deleteAllMyFiles', filesController.DeleteAllMyFiles);
+// Delete all files for any user
+router.delete('/deleteAllFilesForAnyUser', filesController.deleteAllFilesForAnyUser);
+// Download a file by ID
+router.get('/download/:id', filesController.downloadFile);
+
+
 
 /**
- * Session routes.
- * 
- * These routes handle session-related functionality.
- */
-
-/**
- * Get all sessions route.
- * 
- * This route retrieves all sessions.
- * 
- * @route GET /getAllSessions
- */
+ * Session routes
+*/
+// Route to get all sessions
 router.get('/getAllSessions', sessionController.getAllSessions);
-
-/**
- * Get session by user ID route.
- * 
- * This route retrieves a session by user ID.
- * 
- * @route GET /getSessionByUserId/:id
- */
+// Route to get sessions by user ID. All sessions for a particular user
 router.get('/getSessionByUserId/:id', sessionController.getSessionByUserId);
+//Route to delete all sessions for a particular user
+router.delete('/deleteAllSessionsForAnyUser/:id', sessionController.deleteAllSessionsForAnyUser);
+// Route to delete all sessions
+router.delete('/deleteAllSessions', sessionController.deleteAllSessions);
+
+
+
 
 /**
- * Export the router.
- * 
- * This allows other parts of the application to use the router.
- */
-
+ * Language routes
+*/
 // Route to create a new language
 router.post('/languages', languageController.createLanguage);
-
 // Route to update an existing language
 router.put('/languages/:id', languageController.updateLanguage);
-
-
 // Route to delete a language
 router.delete('/languages/:id', languageController.deleteLanguage);
-
 // Route to get all languages
 router.get('/languages', languageController.getAllLanguages);
-
 // Route to get a specific language by ID
 router.get('/languages/:id', languageController.getLanguage);
+
+
+
+// Export the router
 module.exports = router;

@@ -22,11 +22,11 @@ passport.use(new LocalStrategy(
     try {
       const user = await User.findOne({ username });
       if (!user) {
-        return done(null, false, { message: 'Invalid username or password' });
+        return done(null, false, { message: 'User not found' });
       }
       const isValidPassword = await user.comparePassword(password);
       if (!isValidPassword) {
-        return done(null, false, { message: 'Invalid username or password' });
+        return done(null, false, { message: 'Invalid password' });
       }
       return done(null, user);
     } catch (err) {
