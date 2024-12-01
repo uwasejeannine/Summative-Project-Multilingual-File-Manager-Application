@@ -28,7 +28,6 @@ The app has the following routes:
 
 These routes handle user-related operations.
 
-## Routes
 
 ### 1. Register a new user
 
@@ -81,13 +80,10 @@ These routes handle user-related operations.
 * Handler: `usersController.updatePassword`
 
 
-### File Routes
-
 # File Routes
 
 These routes handle file-related operations.
 
-## Routes
 
 ### 1. Upload a file
 
@@ -144,11 +140,37 @@ These routes handle file-related operations.
 * **GET** `/download/:id`
 * Handler: `filesController.downloadFile`
 
+
+# Session Routes
+
+These routes handle session-related operations.
+
+### 1. Get all sessions
+
+* **GET** `/getAllSessions`
+* Handler: `sessionController.getAllSessions`
+
+### 2. Get sessions by user ID
+
+* **GET** `/getSessionByUserId/:id`
+* Handler: `sessionController.getSessionByUserId`
+
+### 3. Delete all sessions for a particular user
+
+* **DELETE** `/deleteAllSessionsForAnyUser/:id`
+* Handler: `sessionController.deleteAllSessionsForAnyUser`
+
+### 4. Delete all sessions
+
+* **DELETE** `/deleteAllSessions`
+* Handler: `sessionController.deleteAllSessions`
+
+
+
 # Language Routes
 
 These routes handle language-related operations.
 
-## Routes
 
 ### 1. Create a new language
 
