@@ -160,7 +160,7 @@ db.connectToDb((err) => {
     });
   }
 });
-
+module.exports = app; 
 
 //redis-cli ping
 //redis-cli
