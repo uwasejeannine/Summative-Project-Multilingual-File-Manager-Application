@@ -9,6 +9,7 @@ const User = require('../models/user');
 const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
+const redisClient = require('../config/redis');
 
 const File = require('../models/files');
 const fileQueue = require('../queue/fileQueue');
@@ -72,7 +73,7 @@ exports.uploadFiles = async (req, res) => {
     upload.array()(req, res, async (err) => {
       if (err) {
         console.error(err);
-        return res.status(500).json({ message:  req.t('errorUploadingFile') });
+        return res.status(500).json({ message: req.t('errorUploadingFile') });
       }
 
       if (!req.session.passport) {
@@ -89,6 +90,7 @@ exports.uploadFiles = async (req, res) => {
       if (file.size > maxFileSize) {
         return res.status(400).json({ message: req.t('fileSizeLimitExceeded') });
       }
+      
       const fileDocs = [];
       if (req.files && req.files.length > 0) {
         const fileDoc = new File({
@@ -110,7 +112,27 @@ exports.uploadFiles = async (req, res) => {
             await fileDoc.save();
             await User.findByIdAndUpdate(userId, { $push: { files: fileDoc.filename } });
           }));
-  
+
+          // Now add this file's details to Redis
+          const fileKey = `file:${req.uniqueName}`;
+          const fileData = {
+            filename: req.uniqueName,
+            filePath: file.path,
+            size: file.size,
+            contentType: file.mimetype,
+            owner: userId,
+            uploadDate: new Date(),
+            lastAccessed: new Date(),
+            lastModified: new Date(),
+            fileStatus: 'active'
+          };
+
+          // Store the file data in Redis
+          await redisClient.set(fileKey, JSON.stringify(fileData));
+
+          // Log to confirm it's added to Redis
+          console.log('File added to Redis:', fileData);
+
           return res.json({ message: req.t('UploadedSuccessfully') });
         } catch (err) {
           console.error(err);
@@ -126,8 +148,6 @@ exports.uploadFiles = async (req, res) => {
       .json({ message: req.t('errorUploadingFile') });
   }
 }
-
-
 /**
  * Get all files.
  * 
