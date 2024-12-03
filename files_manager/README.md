@@ -198,6 +198,58 @@ These routes handle language-related operations.
 * Handler: `languageController.getLanguage`
 
 
+
+# Technical Details
+
+## Backend Framework
+
+* **Express.js**: A popular web framework for Node.js that allows us to build web applications and APIs.
+
+## Database
+
+* **MongoDB**: A NoSQL database that stores data in JSON-like documents. It is scalable and flexible, making it a good choice for applications that require flexible data models.
+* **Mongoose**: An Object-Document Mapping (ODM) library that provides a simple way to interact with MongoDB from Node.js.
+
+## Authentication
+
+* **Passport.js**: A popular authentication middleware for Node.js that supports various authentication strategies, including Local Strategy (username and password authentication).
+
+## File Upload
+
+* **Multer**: A middleware for handling multipart/form-data, which is commonly used for file uploads.
+
+## Internationalization
+
+* **i18next**: A popular internationalization library that provides a simple way to handle translations in our application.
+* **i18next-fs-backend**: A backend for i18next that stores translations in a file system.
+* **i18next-http-middleware**: A middleware for i18next that provides a simple way to handle translations in our application.
+
+## Session Management
+
+* **Express-Session**: A session middleware for Express.js that provides a simple way to manage user sessions in our application.
+
+## Cache and Message Broker
+
+* **Redis**: An in-memory data structure store that can be used as a cache and message broker.
+
+## Job Queueing
+
+* **Bull**: A fast and reliable job queueing library for Node.js that provides a simple way to handle background jobs and tasks.
+
+## Encryption
+
+* **Crypto**: A built-in Node.js library that provides a simple way to perform cryptographic operations, such as encryption and decryption.
+
+## Environment Variables
+
+* **Dotenv**: A library that loads environment variables from a `.env` file into `process.env`.
+
+## Password Hashing
+
+* **Bcrypt**: A password hashing library that provides a simple way to hash passwords securely.
+
+
+
 ## Contributing
 
 Contributions are welcome! If you'd like to contribute to the app, please fork the repository and submit a pull request.
